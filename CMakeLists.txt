@@ -8,11 +8,6 @@ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_23)
 target_include_directories(${PROJECT_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(LOGGER_SCRIPT "./blola.py")
-
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/${LOGGER_SCRIPT}"
-  "${CMAKE_CURRENT_BINARY_DIR}/${LOGGER_SCRIPT}"
-  COPYONLY
-)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/blola.py")
 
