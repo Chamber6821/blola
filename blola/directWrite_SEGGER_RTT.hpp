@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blola/blola.hpp"
+#include "blola.hpp"
 
 #include <array>
 #include <cstring>
