@@ -275,6 +275,7 @@ def extract_blola_log_ids(code: str) -> list[RawLog]:
         r"::blola::logId\((?P<file>.+?)\s*,\s*(?P<line>\d+)\s*,\s*\((?P<message>.+?)\)\s*,\s*\"BLOLA_LOG_ID_END\"\)",
         re.DOTALL,
     )
+    code = re.sub(r"^\s*#.*?$", "", code, flags=re.MULTILINE)
 
     return [
         RawLog(
