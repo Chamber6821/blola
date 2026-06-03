@@ -1,8 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <concepts>
 #include <optional>
 #include <string_view>
+#include <type_traits>
 
 namespace blola {
 
@@ -163,9 +165,27 @@ findUnknownSpecifier(std::string_view str) {
   return str.substr(start, len);
 }
 
+template <std::size_t Size> struct smallest_int_of_size {
+  using type = std::conditional_t<
+      sizeof(signed char) == Size, signed char,
+      std::conditional_t<
+          sizeof(short) == Size, short,
+          std::conditional_t<
+              sizeof(int) == Size, int,
+              std::conditional_t<sizeof(long) == Size, long,
+                                 std::conditional_t<sizeof(long long) == Size,
+                                                    long long, void>>>>>;
+};
+
 template <class T> struct AutoCast : tid<T> {};
 template <class T> struct AutoCast<T *> : tid<void *> {};
 template <> struct AutoCast<std::nullptr_t> : tid<void *> {};
+template <std::signed_integral T>
+struct AutoCast<T> : tid<typename smallest_int_of_size<sizeof(T)>::type> {};
+template <std::unsigned_integral T>
+struct AutoCast<T> : tid<std::make_unsigned_t<
+                         typename smallest_int_of_size<sizeof(T)>::type>> {};
+
 template <class T> using AutoCast_t = typename AutoCast<T>::type;
 
 struct valid_types {

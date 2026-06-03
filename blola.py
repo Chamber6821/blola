@@ -8,7 +8,6 @@ import struct
 import sys
 import termios
 import tty
-import random
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
@@ -478,7 +477,7 @@ class Printer:
             message=message,
             style=AnsiStyle,
         )
-        print(self.format.format(**asdict(context)))
+        print(self.format.format(**asdict(context)), flush=True)
 
 
 def read_log(
