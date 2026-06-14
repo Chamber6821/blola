@@ -35,6 +35,8 @@ Run
 make run-just_log
 ```
 
+<img width="1383" height="128" alt="image" src="https://github.com/user-attachments/assets/a25082fe-17d1-4ce4-8a15-9214a5f76181" />
+
 ### Error messages
 
 If you don't implement `directWrite(...)` (or don't use supplied implementation)
@@ -50,7 +52,7 @@ int main() {
 
 Error message:
 
-(insert image on github)
+<img width="2958" height="579" alt="image" src="https://github.com/user-attachments/assets/2bbd73eb-3a9f-4efb-9067-af4816351184" />
 
 If type mismatch:
 
@@ -63,4 +65,4 @@ int main() { blog("My data: %d", 'X'); }
 
 Error message:
 
-(insert image on github)
+<img width="2396" height="459" alt="image" src="https://github.com/user-attachments/assets/9882df35-c12a-4116-a691-8ba173e0dbe9" />
