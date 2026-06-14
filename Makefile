@@ -1,5 +1,5 @@
 configure: Makefile CMakeLists.txt
-	cmake -S . -B ./build
+	cmake -DBLOLA_EXAMPLES=ON -S . -B ./build
 
 build: configure
 	cmake --build ./build
