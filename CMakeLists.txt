@@ -11,3 +11,15 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 set_target_properties(${PROJECT_NAME} PROPERTIES
   SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/blola.py")
 
+# Configure example just_log
+
+set(EXAMPLE_JUST_LOG ${PROJECT_NAME}_example_just_log)
+
+add_executable(${EXAMPLE_JUST_LOG}
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/just_log/main.cpp")
+
+target_link_libraries(${EXAMPLE_JUST_LOG} PUBLIC ${PROJECT_NAME})
+
+set_target_properties(${EXAMPLE_JUST_LOG} PROPERTIES
+  EXPORT_COMPILE_COMMANDS ON
+  COMPILE_FLAGS "-save-temps=obj")
