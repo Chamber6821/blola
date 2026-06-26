@@ -51,7 +51,7 @@ int main() {
 
 Error message:
 
-<img width="2958" height="579" alt="image" src="https://github.com/user-attachments/assets/2bbd73eb-3a9f-4efb-9067-af4816351184" />
+<img width="2450" height="450" alt="image" src="https://github.com/user-attachments/assets/a8a1abca-7f4c-4d39-aaa9-26e009ed627e" />
 
 If type mismatch:
 
