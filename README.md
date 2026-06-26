@@ -20,8 +20,7 @@ to use host script:
 ### Just log
 
 ```c++
-#include <blola/blola.hpp>
-#include <blola/directWrite_stdout.hpp>
+#include <blola/configured/stdout.hpp>
 
 int main() {
   blog("Hello World!");
@@ -39,10 +38,10 @@ make run-just_log
 
 ### Error messages
 
-If you don't implement `directWrite(...)` (or don't use supplied implementation)
+If you don't define config via define `BLOLA_CONFIG_GLOBAL_VARIABLE_NAME` (or don't use supplied implementation)
 
 ```c++
-#include <blola/blola.hpp>
+#include <blola/blola.hpp> // blola.hpp does not contains any config for transport
 
 int main() {
   blog("Hello World!");
@@ -57,8 +56,7 @@ Error message:
 If type mismatch:
 
 ```c++
-#include <blola/blola.hpp>
-#include <blola/directWrite_stdout.hpp>
+#include <blola/configured/stdout.hpp>
 
 int main() { blog("My data: %d", 'X'); }
 ```
