@@ -10,6 +10,12 @@
 #include <string_view>
 #include <type_traits>
 
+#ifndef BLOLA_CONFIG_GLOBAL_VARIABLE_NAME
+#error                                                                         \
+    "You must define BLOLA_CONFIG_GLOBAL_VARIABLE_NAME for your blola config." \
+"See blola/configured/stdout.hpp"
+#endif
+
 namespace blola {
 
 namespace hash {
@@ -99,27 +105,15 @@ consteval auto logId(std::string_view filename, std::uint32_t line,
   return IdHash{}.add(line, filename, msg).asUint();
 }
 
-struct adl_tag {};
-
-void write(auto... data) {
-  if constexpr (requires() { directWrite(adl_tag{}, data...); }) {
-    directWrite(adl_tag{}, data...);
-  } else {
-    static_assert(
-        false,
-        "You must define custom blola::directWrite(adl_tag, auto... datas)");
-  }
-}
-
-template <CtStr format> void log(auto id, auto... args) {
+template <CtStr format, class Config> void log(auto id, auto... args) {
   [[maybe_unused]] constexpr auto _ =
       format::valid_types::validate<format, decltype(args)...>();
-  write(id, BodyHash{}.add(id, args...).asUint(), args...);
+  Config::write(id, BodyHash{}.add(id, args...).asUint(), args...);
 }
 
 } // namespace blola
 
 #define blog(MSG, ...)                                                         \
-  blola::log<(MSG)>(                                                           \
+  blola::log<(MSG), BLOLA_CONFIG_GLOBAL_VARIABLE_NAME>(                        \
       ::blola::logId(__FILE__, __LINE__, (MSG), "BLOLA_LOG_ID_END")            \
           __VA_OPT__(, ) __VA_ARGS__)

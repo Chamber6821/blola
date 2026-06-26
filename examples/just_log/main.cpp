@@ -1,5 +1,4 @@
-#include <blola/blola.hpp>
-#include <blola/directWrite_stdout.hpp>
+#include <blola/configured/stdout.hpp>
 
 int main() {
   blog("Hello World!");
