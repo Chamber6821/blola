@@ -36,6 +36,25 @@ make run-just_log
 
 <img width="1383" height="128" alt="image" src="https://github.com/user-attachments/assets/a25082fe-17d1-4ce4-8a15-9214a5f76181" />
 
+### Strings supported
+
+```c++
+
+#include <blola/configured/stdout.hpp>
+#include <string_view>
+
+int main() {
+  blog("C string: %s", "aboba2");
+  blog("std::string_view: %s", std::string_view("view"));
+}
+```
+
+Run
+
+```
+make run-strings
+```
+
 ### Error messages
 
 If you don't define config via define `BLOLA_CONFIG_GLOBAL_VARIABLE_NAME` (or don't use supplied implementation)
