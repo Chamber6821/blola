@@ -12,11 +12,26 @@
 
 #ifndef BLOLA_CONFIG_GLOBAL_VARIABLE_NAME
 #error                                                                         \
-    "You must define BLOLA_CONFIG_GLOBAL_VARIABLE_NAME for your blola config." \
-"See blola/configured/stdout.hpp"
+    "You must define BLOLA_CONFIG_GLOBAL_VARIABLE_NAME for your blola config. See blola/configured/stdout.hpp"
 #endif
 
 namespace blola {
+
+template <class T> struct AutoPack;
+
+template <class T>
+  requires std::integral<T> || std::floating_point<T>
+struct AutoPack<T> {
+  T val;
+};
+
+template <> struct AutoPack<const char *> {
+  std::string_view val;
+};
+
+template <> struct AutoPack<std::string_view> {
+  std::string_view val;
+};
 
 namespace hash {
 
@@ -76,11 +91,21 @@ public:
     return add(std::bit_cast<std::uint64_t>(val));
   }
 
-  constexpr Hash add(std::string_view val) const noexcept {
+  constexpr Hash add(std::string_view s) const noexcept {
     auto copy = *this;
-    for (std::uint8_t ch : val)
-      copy = copy.add(ch);
+    while (!s.empty()) {
+      TVal x = 0;
+      auto n = std::min(s.size(), sizeof(TVal));
+      for (std::size_t i = 0; i < n; ++i)
+        x |= TVal(static_cast<unsigned char>(s[i])) << (i * 8);
+      copy = copy.add(x);
+      s.remove_prefix(n);
+    }
     return copy;
+  }
+
+  constexpr Hash add(const char *val) const noexcept {
+    return add(std::string_view{val});
   }
 
   constexpr Hash add(auto *val) const noexcept {
@@ -94,7 +119,7 @@ public:
   }
 };
 
-} // namespace hash
+}; // namespace hash
 
 using HashVal = std::uint16_t;
 using IdHash = hash::Hash<HashVal, hash::function::polynom<1>>;
@@ -105,15 +130,17 @@ consteval auto logId(std::string_view filename, std::uint32_t line,
   return IdHash{}.add(line, filename, msg).asUint();
 }
 
-template <CtStr format, class Config> void log(auto id, auto... args) {
-  [[maybe_unused]] constexpr auto _ =
-      format::valid_types::validate<format, decltype(args)...>();
-  Config::write(id, BodyHash{}.add(id, args...).asUint(), args...);
+template <CtStr format> void log(auto &config, auto id, auto... args) {
+  [[maybe_unused]] constexpr auto _ = format::valid_types::validate<
+      format, decltype(AutoPack<decltype(args)>::val)...>();
+  config.write(id, BodyHash{}.add(id, args...).asUint(),
+               AutoPack<decltype(args)>{args}.val...);
 }
 
 } // namespace blola
 
 #define blog(MSG, ...)                                                         \
-  blola::log<(MSG), BLOLA_CONFIG_GLOBAL_VARIABLE_NAME>(                        \
+  blola::log<(MSG)>(                                                           \
+      (BLOLA_CONFIG_GLOBAL_VARIABLE_NAME),                                     \
       ::blola::logId(__FILE__, __LINE__, (MSG), "BLOLA_LOG_ID_END")            \
           __VA_OPT__(, ) __VA_ARGS__)

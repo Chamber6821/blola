@@ -39,6 +39,7 @@ CppType = Literal[
     "float",
     "double",
     "void*",
+    "char*",
     "intmax_t",
     "uintmax_t",
     "size_t",
@@ -48,7 +49,8 @@ SignedInt = Literal["i8", "i16", "i32", "i64"]
 UnsignedInt = Literal["u8", "u16", "u32", "u64"]
 Int = SignedInt | UnsignedInt
 Float = Literal["f32", "f64"]
-RealType = Int | Float
+Str = Literal["str"]
+RealType = Int | Float | Str
 
 
 Platform = dict[CppType, RealType]
@@ -90,6 +92,10 @@ def is_unsigned(type: RealType) -> TypeGuard[UnsignedInt]:
 
 def is_float(type: RealType) -> TypeGuard[Float]:
     return type in get_args(Float)
+
+
+def is_string(type: RealType) -> TypeGuard[Str]:
+    return type in get_args(Str)
 
 
 @dataclass
@@ -325,6 +331,7 @@ def extract_blola_platform(code: str) -> list[Platform]:
 
         platform["size_t"] = unsigned_typeof(sizes["size"])
         platform["void*"] = unsigned_typeof(sizes["ptr"])
+        platform["char*"] = "str"
 
         platform["intmax_t"] = platform["long long int"]
         platform["uintmax_t"] = platform["unsigned long long int"]
@@ -359,6 +366,7 @@ def parse_message(printf_format: str) -> tuple[str, tuple[CppType, ...]]:
         **expand(("f", "e", "E"), "float"),
         **expand(("lf", "le", "lE"), "double"),
         "p": "void*",
+        "s": "char*",
     }
 
     format_map = {**expand(("i", "u"), "d"), "p": "X"}
@@ -416,7 +424,9 @@ def xor_pairs(data_list: list[bytes]) -> int:
 def parse(b: bytes, type: Int) -> int: ...
 @overload
 def parse(b: bytes, type: Float) -> float: ...
-def parse(b: bytes, type: RealType) -> int | float:
+@overload
+def parse(b: bytes, type: Str) -> str: ...
+def parse(b: bytes, type: RealType) -> int | float | str:
     if is_float(type):
         match len(b):
             case 4:
@@ -425,6 +435,8 @@ def parse(b: bytes, type: RealType) -> int | float:
                 return struct.unpack(">d", b)[0]
             case _:
                 raise ValueError(f"{type} is not parsable")
+    if is_string(type):
+        return b.decode()
     return int.from_bytes(b, "little", signed=is_signed(type))
 
 
@@ -489,18 +501,28 @@ def read_log(
     def read(type: Int) -> tuple[int, bytes]: ...
     @overload
     def read(type: Float) -> tuple[float, bytes]: ...
-    def read(type: RealType) -> tuple[int | float, bytes]:
-        b = reader.read(sizeof(type))
+    @overload
+    def read(type: Str) -> tuple[str, bytes]: ...
+    def read(type: RealType) -> tuple[int | float | str, bytes]:
+        match type:
+            case "str":
+                len_type = "u8"
+                len = parse(reader.read(sizeof(len_type)), len_type)
+                b = reader.read(len)
+            case _:
+                b = reader.read(sizeof(type))
         return parse(b, type), b
 
     id, id_bytes = read("u16")
-    reader.accept()
     log = logs.with_id(id)
     if not log:
         printer.print(
             f"Unknown log ID: {id:5} (0x{id:04X})", file="", line=0, error=True
         )
+        reader.read(1)
+        reader.accept()
         return
+    reader.accept()
     hash, _ = read("u16")
     args = [read(x) for x in log.args]
     args_v = [x[0] for x in args]
@@ -517,6 +539,14 @@ def read_log(
         line=log.line,
         error=(hash != calculated_hash),
     )
+
+    if hash != calculated_hash:
+        printer.print(
+            f"Invalid hash. Received 0x{hash:04X}. Calculated 0x{calculated_hash:04X}",
+            file=log.file,
+            line=log.line,
+            error=True,
+        )
 
 
 def assert_platforms_equal(platforms: list[Platform]):

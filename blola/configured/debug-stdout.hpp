@@ -2,16 +2,16 @@
 
 #include "blola/config.hpp"
 
-#include <bit>
+#include <ios>
 #include <iostream>
-#include <string_view>
 
 #define BLOLA_CONFIG_GLOBAL_VARIABLE_NAME blola__config__
 
 #include "../blola.hpp"
 
 inline auto BLOLA_CONFIG_GLOBAL_VARIABLE_NAME =
-    blola::config{blola::double_buffered{[](auto buffer, auto len) {
-      std::cout << std::string_view{std::bit_cast<const char *>(buffer), len};
+    blola::config{[](auto... datas) {
+      std::cout << "--- Write ---" << std::endl;
+      ((std::cout << std::hex << datas << std::endl), ...);
       std::cout.flush();
-    }}};
+    }};

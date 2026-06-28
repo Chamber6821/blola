@@ -16,14 +16,21 @@ if(BLOLA_EXAMPLES)
 
   # Configure example just_log
 
-  set(EXAMPLE_JUST_LOG ${PROJECT_NAME}_example_just_log)
-
-  add_executable(${EXAMPLE_JUST_LOG}
+  set(EXAMPLE_PROJECT ${PROJECT_NAME}_example_just_log)
+  add_executable(${EXAMPLE_PROJECT}
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/just_log/main.cpp")
+  target_link_libraries(${EXAMPLE_PROJECT} PUBLIC ${PROJECT_NAME})
+  set_target_properties(${EXAMPLE_PROJECT} PROPERTIES
+  EXPORT_COMPILE_COMMANDS ON
+  COMPILE_FLAGS "-save-temps=obj")
 
-  target_link_libraries(${EXAMPLE_JUST_LOG} PUBLIC ${PROJECT_NAME})
+  # Configure example strings
 
-  set_target_properties(${EXAMPLE_JUST_LOG} PROPERTIES
+  set(EXAMPLE_PROJECT ${PROJECT_NAME}_example_strings)
+  add_executable(${EXAMPLE_PROJECT}
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/strings/main.cpp")
+  target_link_libraries(${EXAMPLE_PROJECT} PUBLIC ${PROJECT_NAME})
+  set_target_properties(${EXAMPLE_PROJECT} PROPERTIES
   EXPORT_COMPILE_COMMANDS ON
   COMPILE_FLAGS "-save-temps=obj")
 

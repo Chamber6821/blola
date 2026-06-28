@@ -8,3 +8,6 @@ run-just_log: build
 	./blola.py collect -s examples ./build/CMakeFiles/blola_example_just_log.dir/examples/just_log/main.cpp.ii
 	./build/blola_example_just_log | ./blola.py log
 
+run-strings: build
+	./blola.py collect -s examples ./build/CMakeFiles/blola_example_strings.dir/examples/strings/main.cpp.ii
+	./build/blola_example_strings | ./blola.py log

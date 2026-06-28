@@ -84,7 +84,8 @@ enum class TypeTag {
   f,
   d,
   size,
-  ptr
+  ptr,
+  str,
 };
 
 template <class T> using tid = std::type_identity<T>;
@@ -105,7 +106,8 @@ template <> struct tagToType<TypeTag::uim> : tid<unsigned long long int> {};
 template <> struct tagToType<TypeTag::f> : tid<float> {};
 template <> struct tagToType<TypeTag::d> : tid<double> {};
 template <> struct tagToType<TypeTag::size> : tid<std::size_t> {};
-template <> struct tagToType<TypeTag::ptr> : tid<void *> {};
+template <> struct tagToType<TypeTag::ptr> : tid<const void *> {};
+template <> struct tagToType<TypeTag::str> : tid<std::string_view> {};
 
 template <TypeTag Tag> using tagToType_t = typename tagToType<Tag>::type;
 
@@ -147,6 +149,8 @@ consteval std::optional<TypeTag> matchType(std::string_view specifier) {
     return d;
   if (startsWithAny(specifier, "p"))
     return ptr;
+  if (startsWithAny(specifier, "s"))
+    return str;
   return std::nullopt;
 }
 
@@ -179,6 +183,7 @@ template <std::size_t Size> struct smallest_int_of_size {
 
 template <class T> struct AutoCast : tid<T> {};
 template <class T> struct AutoCast<T *> : tid<void *> {};
+template <> struct AutoCast<const char *> : tid<const char *> {};
 template <> struct AutoCast<std::nullptr_t> : tid<void *> {};
 template <std::signed_integral T>
 struct AutoCast<T> : tid<typename smallest_int_of_size<sizeof(T)>::type> {};
