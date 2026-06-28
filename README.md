@@ -55,6 +55,8 @@ Run
 make run-strings
 ```
 
+<img width="1371" height="129" alt="image" src="https://github.com/user-attachments/assets/22df397e-5385-4c8d-b7fd-155c05f4b808" />
+
 ### Error messages
 
 If you don't define config via define `BLOLA_CONFIG_GLOBAL_VARIABLE_NAME` (or don't use supplied implementation)
