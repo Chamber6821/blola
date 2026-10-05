@@ -93,14 +93,15 @@ public:
 
   constexpr Hash add(std::string_view s) const noexcept {
     auto copy = *this;
-    while (!s.empty()) {
+    while (s.size() >= sizeof(TVal)) {
       TVal x = 0;
-      auto n = std::min(s.size(), sizeof(TVal));
-      for (std::size_t i = 0; i < n; ++i)
+      for (std::size_t i = 0; i < sizeof(TVal); ++i)
         x |= TVal(static_cast<unsigned char>(s[i])) << (i * 8);
       copy = copy.add(x);
-      s.remove_prefix(n);
+      s.remove_prefix(sizeof(TVal));
     }
+    for (std::size_t i = 0; i < s.size(); ++i)
+      copy = copy.add(static_cast<unsigned char>(s[i]));
     return copy;
   }
 
